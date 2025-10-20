@@ -8,4 +8,6 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface AccountRepository extends ReactiveCrudRepository<Account,Long> {
     Mono<Account> findTopByOrderByIdDesc();
+
+    Mono<Account> findByUserId(Long userId);
 }
