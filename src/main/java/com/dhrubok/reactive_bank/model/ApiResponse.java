@@ -24,11 +24,10 @@ public final class ApiResponse <T> {
                 .status(status)
                 .build();
     }
-    public static <T> ApiResponse<T> failure(String message, T data, HttpStatus status) {
+    public static <T> ApiResponse<T> failure(String message, HttpStatus status) {
         return ApiResponse.<T>builder()
                 .success(false)
                 .message(message)
-                .data(data)
                 .status(status)
                 .build();
     }

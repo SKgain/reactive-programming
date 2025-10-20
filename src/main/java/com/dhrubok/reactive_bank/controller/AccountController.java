@@ -10,4 +10,5 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/account")
 @Slf4j
 public class AccountController {
+
 }
