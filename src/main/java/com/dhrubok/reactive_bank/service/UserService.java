@@ -30,7 +30,6 @@ import static com.dhrubok.reactive_bank.constant.ErrorConstant.*;
 @Slf4j
 public class UserService {
     private final AccountService accountService;
-    private final UserCreatorService userCreatorService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;

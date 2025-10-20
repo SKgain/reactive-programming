@@ -9,8 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import javax.crypto.SecretKey;
+import javax.security.auth.login.CredentialException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,28 +42,35 @@ public class JWTService {
 
     // 🔹 Extract username reactively
     public Mono<String> extractUserName(String token) {
-        return Mono.fromCallable(() -> {
-            if (token == null || token.isBlank()) {
-                throw new IllegalArgumentException("Token is missing");
-            }
-            return Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getSubject();
-        }).onErrorResume(e -> {
-            log.error("Failed to extract username from token: {}", e.getMessage());
-            return Mono.empty();
-        });
+        if (token == null || token.isBlank()) {
+            return Mono.empty(); // no token
+        }
+        return Mono.fromCallable(() ->
+                        Jwts.parser()
+                                .verifyWith(secretKey)
+                                .build()
+                                .parseSignedClaims(token)
+                                .getPayload()
+                                .getSubject()
+                ).subscribeOn(Schedulers.boundedElastic())
+                .onErrorResume(e -> {
+                    log.warn("Failed to extract username from token: {}", e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     // 🔹 Validate token reactively
     public Mono<Boolean> validateToken(String token, UserDetails userDetails) {
-        return extractUserName(token)
-                .map(username -> username.equals(userDetails.getUsername()))
-                .defaultIfEmpty(false)
-                .flatMap(valid -> isTokenExpired(token).map(expired -> valid && !expired));
+        return Mono.fromCallable(() -> {
+                    String username = Jwts.parser()
+                            .verifyWith(secretKey)
+                            .build()
+                            .parseSignedClaims(token)
+                            .getPayload()
+                            .getSubject();
+                    return username.equals(userDetails.getUsername());
+                }).subscribeOn(Schedulers.boundedElastic())
+                .onErrorReturn(false);
     }
 
     // 🔹 Check expiration reactively
