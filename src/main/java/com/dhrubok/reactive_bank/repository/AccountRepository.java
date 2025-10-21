@@ -10,4 +10,6 @@ public interface AccountRepository extends ReactiveCrudRepository<Account,Long> 
     Mono<Account> findTopByOrderByIdDesc();
 
     Mono<Account> findByUserId(Long userId);
+
+    Mono<Account> findByAccountNumber(String accountNumber);
 }

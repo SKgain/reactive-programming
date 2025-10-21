@@ -27,7 +27,7 @@ public class SecurityConfig {
     private final ReactiveUserDetailsService userDetailsService;
     private final JWTService jwtService;
 
-    @Bean
+        @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         JwtFilter jwtFilter = new JwtFilter(jwtService, userDetailsService);
 

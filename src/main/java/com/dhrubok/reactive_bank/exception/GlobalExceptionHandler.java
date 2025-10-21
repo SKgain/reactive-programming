@@ -26,6 +26,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse> handleDuplicateUserException(DuplicateUserException ex){
         return ResponseEntity.status(CONFLICT).body(ApiResponse.failure(ex.getMessage(),CONFLICT));
     }
+    @ExceptionHandler(InsufficientFundsException.class)
+    public ResponseEntity<ApiResponse> handleInsufficientFundsException(InsufficientFundsException ex){
+        return ResponseEntity.status(BAD_REQUEST).body(ApiResponse.failure(ex.getMessage(),BAD_REQUEST));
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(

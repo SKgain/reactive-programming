@@ -4,6 +4,7 @@ import com.dhrubok.reactive_bank.security.jwt.service.JWTService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -14,7 +15,6 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class JwtFilter implements WebFilter {
@@ -27,7 +27,7 @@ public class JwtFilter implements WebFilter {
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            // No token → continue without authentication
+            // No token → let Spring Security handle it
             return chain.filter(exchange);
         }
 
@@ -40,25 +40,26 @@ public class JwtFilter implements WebFilter {
                                         jwtService.validateToken(token, userDetails)
                                                 .flatMap(isValid -> {
                                                     if (Boolean.TRUE.equals(isValid)) {
-                                                        log.info("User object class: {}", userDetails.getClass().getName());
-                                                        log.info("Calling isAccountNonExpired()...");
                                                         Authentication auth = new UsernamePasswordAuthenticationToken(
                                                                 userDetails, null, userDetails.getAuthorities());
+                                                        // Attach authentication in reactive context
                                                         return chain.filter(exchange)
                                                                 .contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth));
+                                                    } else {
+                                                        log.warn("Invalid JWT token for user: {}", username);
+                                                        // Terminate request with 401
+                                                        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                                                        return exchange.getResponse().setComplete();
                                                     }
-                                                    // Invalid token → continue without authentication
-                                                    return chain.filter(exchange);
                                                 })
                                 )
                 )
-                // If username not found → continue without authentication
                 .switchIfEmpty(chain.filter(exchange))
                 .onErrorResume(e -> {
-                    log.warn("JWT processing failed: {}", e.getMessage());
-                    return chain.filter(exchange);  // just continue chain without authentication
+                    log.warn("JWT processing failed: {}", e.toString());
+                    // Terminate request on any unexpected error
+                    exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                    return exchange.getResponse().setComplete();
                 });
     }
-
-
 }
