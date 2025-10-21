@@ -14,15 +14,12 @@ import java.util.List;
 @Getter
 public class UserDetailsPrinciple implements UserDetails {
 
-
     private final String username;
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
 
-
     public UserDetailsPrinciple(User user) {
         log.info("Creating UserDetailsPrinciple and copying values...");
-
         this.username = user.getEmail();
         this.password = user.getPassword();
         String role = (user.getRole() != null) ? user.getRole().toUpperCase() : "";
@@ -47,13 +44,11 @@ public class UserDetailsPrinciple implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        log.info("? isAccountNonExpired() called!");
         return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        log.info("? isAccountNonLocked() called!");
         return true;
     }
 

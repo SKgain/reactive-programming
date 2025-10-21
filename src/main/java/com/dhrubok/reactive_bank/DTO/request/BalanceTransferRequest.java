@@ -10,6 +10,6 @@ import java.math.BigDecimal;
 @Getter
 @ToString
 public class BalanceTransferRequest {
-    private String senderAccountNumber;
+    private String receiverAccountNumber;
     private BigDecimal amount;
 }

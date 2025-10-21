@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -19,12 +20,22 @@ public class TransactionService {
     private final TransactionNumberGeneratorService transactionNumberGeneratorService;
 
     public Mono<Transaction> createTransaction(
-            User sender,
             Account senderAccount,
             String transactionType,
             Account receiverAccount,
             BigDecimal amount
-            ) {
-
+    ) {
+        return transactionNumberGeneratorService.generateTransactionNumber()
+                .flatMap(tnxnum-> {
+                    Transaction transaction = new Transaction();
+                    transaction.setTransactionNumber(tnxnum);
+                    transaction.setDate(LocalDate.now());
+                    transaction.setAmount(amount);
+                    transaction.setType(transactionType);
+                    transaction.setSenderAccountNumber(senderAccount.getAccountNumber());
+                    transaction.setReceiverAccountNumber(receiverAccount.getAccountNumber());
+                    transaction.setUserId(receiverAccount.getUserId());
+                    return transactionRepository.save(transaction);
+                });
     }
 }

@@ -25,13 +25,13 @@ public class TransactionNumberGeneratorService {
                         log.info("Generated new account number: {}", INITIAL_TRANSACTION_NUMBER);
                         return Mono.just(INITIAL_TRANSACTION_NUMBER);
                     }
-                    else {
+
                         int lastNum = Integer.parseInt(lastTransactionNumber.substring(3));
                         String next = TRANSACTION_CODE + (lastNum + 1);
                         log.info("Generated new account number: {}", next);
                         return Mono.just(next);
-                    }
+
                 })
-                .switchIfEmpty(Mono.just(INITIAL_TRANSACTION_NUMBER));
+                .switchIfEmpty(Mono.defer(()-> Mono.just(INITIAL_TRANSACTION_NUMBER)));
     }
 }

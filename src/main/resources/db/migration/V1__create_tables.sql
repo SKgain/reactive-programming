@@ -23,5 +23,6 @@ CREATE TABLE transactions (
                               receiver_account_number VARCHAR(50) NOT NULL,
                               amount NUMERIC(19,2) NOT NULL,
                               type VARCHAR(50),
-                              date DATE NOT NULL
+                              date DATE NOT NULL,
+                              transaction_number VARCHAR(100) UNIQUE NOT NULL
 );
