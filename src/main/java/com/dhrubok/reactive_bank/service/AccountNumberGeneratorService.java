@@ -1,6 +1,6 @@
 package com.dhrubok.reactive_bank.service;
 
-import com.dhrubok.reactive_bank.entity.Account;
+
 import com.dhrubok.reactive_bank.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
